@@ -2,8 +2,7 @@
 
 import React, { useState } from 'react';
 import { Card, CardContent, Typography, Chip, Box, IconButton, Tooltip } from '@mui/material';
-import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
-import CheckCircleIcon from '@mui/icons-material/CheckCircle';
+import { CheckCircleOutline as CheckCircleOutlineIcon, CheckCircle as CheckCircleIcon } from '@mui/icons-material';
 import { format } from 'date-fns';
 
 export interface NotificationData {

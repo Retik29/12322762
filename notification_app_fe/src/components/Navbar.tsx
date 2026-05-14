@@ -2,8 +2,7 @@
 
 import React from 'react';
 import { AppBar, Toolbar, Typography, Button, Box } from '@mui/material';
-import NotificationsIcon from '@mui/icons-material/Notifications';
-import PriorityHighIcon from '@mui/icons-material/PriorityHigh';
+import { Notifications as NotificationsIcon, PriorityHigh as PriorityHighIcon } from '@mui/icons-material';
 import { useRouter, usePathname } from 'next/navigation';
 
 export default function Navbar() {
