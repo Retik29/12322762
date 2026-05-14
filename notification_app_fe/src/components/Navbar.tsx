@@ -1,6 +1,7 @@
 import React from 'react';
 import { AppBar, Toolbar, Typography, Button, Box, Container } from '@mui/material';
-import { Notifications, PriorityHigh } from '@mui/icons-material';
+import NotificationsIcon from '@mui/icons-material/Notifications';
+import PriorityHighIcon from '@mui/icons-material/PriorityHigh';
 import { useNavigate, useLocation } from 'react-router-dom';
 
 export default function Navbar() {

@@ -14,7 +14,7 @@ import {
   Chip,
   Stack
 } from '@mui/material';
-import { Notifications } from '@mui/icons-material';
+import NotificationsIcon from '@mui/icons-material/Notifications';
 import NotificationCard, { NotificationData } from '../components/NotificationCard';
 import { frontendLog, getAuthToken } from '../utils/logger';
 
@@ -70,7 +70,7 @@ export default function Home() {
       {/* Header */}
       <Paper elevation={0} sx={{ p: 3, mb: 3, background: 'linear-gradient(135deg, #0d47a1 0%, #1565c0 100%)', borderRadius: 3, color: 'white' }}>
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: 1 }}>
-          <Notifications sx={{ fontSize: 28 }} />
+          <NotificationsIcon sx={{ fontSize: 28 }} />
           <Typography variant="h5" fontWeight="bold">All Notifications</Typography>
         </Box>
         <Typography variant="body2" sx={{ opacity: 0.85 }}>

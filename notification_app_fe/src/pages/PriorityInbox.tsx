@@ -13,7 +13,7 @@ import {
   Paper,
   Divider
 } from '@mui/material';
-import { PriorityHigh } from '@mui/icons-material';
+import PriorityHighIcon from '@mui/icons-material/PriorityHigh';
 import NotificationCard, { NotificationData } from '../components/NotificationCard';
 import { frontendLog } from '../utils/logger';
 
@@ -55,7 +55,7 @@ export default function PriorityInbox() {
       {/* Header */}
       <Paper elevation={0} sx={{ p: 3, mb: 3, background: 'linear-gradient(135deg, #1565c0 0%, #1976d2 100%)', borderRadius: 3, color: 'white' }}>
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: 1 }}>
-          <PriorityHigh sx={{ fontSize: 28 }} />
+          <PriorityHighIcon sx={{ fontSize: 28 }} />
           <Typography variant="h5" fontWeight="bold">Priority Inbox</Typography>
         </Box>
         <Typography variant="body2" sx={{ opacity: 0.85, mb: 2 }}>
