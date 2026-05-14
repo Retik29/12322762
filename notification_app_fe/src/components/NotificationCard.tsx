@@ -3,7 +3,7 @@ import { Card, CardContent, Typography, Chip, Box, IconButton, Tooltip } from '@
 import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutlined';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import { format } from 'date-fns';
-import { NotificationData } from '../types';
+import type { NotificationData } from '../types';
 
 interface NotificationCardProps {
   notification: NotificationData;

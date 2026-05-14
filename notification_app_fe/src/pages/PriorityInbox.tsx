@@ -7,7 +7,7 @@ import {
 import PriorityHighIcon from '@mui/icons-material/PriorityHigh';
 import NotificationCard from '../components/NotificationCard';
 import { frontendLog } from '../utils/logger';
-import { NotificationData } from '../types';
+import type { NotificationData } from '../types';
 
 const TOP_N_OPTIONS = [5, 10, 15, 20];
 

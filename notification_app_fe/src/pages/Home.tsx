@@ -7,7 +7,7 @@ import {
 import NotificationsIcon from '@mui/icons-material/Notifications';
 import NotificationCard from '../components/NotificationCard';
 import { frontendLog, getAuthToken } from '../utils/logger';
-import { NotificationData } from '../types';
+import type { NotificationData } from '../types';
 
 const NOTIFICATION_TYPES = ['All', 'Event', 'Result', 'Placement'];
 const TYPE_COLORS: Record<string, 'default' | 'info' | 'warning' | 'error'> = {
