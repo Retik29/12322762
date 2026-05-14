@@ -4,8 +4,8 @@
  */
 import axios from 'axios';
 
-const LOG_URL = 'http://4.224.186.213/evaluation-service/logs';
-const AUTH_URL = 'http://4.224.186.213/evaluation-service/auth';
+const LOG_URL = '/evaluation-service/logs';
+const AUTH_URL = '/evaluation-service/auth';
 
 const config = {
   email: import.meta.env.VITE_USER_EMAIL || '',

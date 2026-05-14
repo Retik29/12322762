@@ -27,7 +27,7 @@ export default function Home() {
     setError(null);
     try {
       const token = await getAuthToken();
-      let url = `http://4.224.186.213/evaluation-service/notifications?limit=${limit}&page=${page}`;
+      let url = `/evaluation-service/notifications?limit=${limit}&page=${page}`;
       if (filterType !== 'All') url += `&notification_type=${filterType}`;
 
       const response = await axios.get(url, {
@@ -65,7 +65,7 @@ export default function Home() {
       </Paper>
 
       <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2, flexWrap: 'wrap', gap: 2 }}>
-        <Stack direction="row" spacing={1} flexWrap="wrap">
+        <Stack direction="row" spacing={1} sx={{ flexWrap: 'wrap', gap: 1 }}>
           {NOTIFICATION_TYPES.map(type => (
             <Chip
               key={type}
