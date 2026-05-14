@@ -26,7 +26,7 @@ export const initLogger = (config: AuthConfig) => {
   currentConfig = config;
 };
 
-const getAuthToken = async (): Promise<string> => {
+export const getAuthToken = async (): Promise<string> => {
   if (!currentConfig) {
     throw new Error("Logger not initialized. Call initLogger with your credentials first.");
   }

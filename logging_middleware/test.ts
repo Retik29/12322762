@@ -16,7 +16,7 @@ const runTest = async () => {
 
   console.log("Sending a test log...");
   const result = await Log("backend", "error", "handler", "received string, expected bool");
-  
+
   if (result) {
     console.log("Log successfully created:", result);
   } else {
