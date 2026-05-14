@@ -15,7 +15,7 @@ export default function Navbar() {
       <Container maxWidth="lg">
         <Toolbar disableGutters>
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, flexGrow: 1 }}>
-            <Notifications sx={{ fontSize: 24 }} />
+            <NotificationsIcon sx={{ fontSize: 24 }} />
             <Typography variant="h6" fontWeight="bold" letterSpacing={0.5}>
               Campus Notify
             </Typography>
@@ -23,7 +23,7 @@ export default function Navbar() {
           <Box sx={{ display: 'flex', gap: 1 }}>
             <Button
               color="inherit"
-              startIcon={<Notifications />}
+              startIcon={<NotificationsIcon />}
               onClick={() => navigate('/')}
               sx={{
                 borderRadius: 2,
@@ -38,7 +38,7 @@ export default function Navbar() {
             </Button>
             <Button
               color="inherit"
-              startIcon={<PriorityHigh />}
+              startIcon={<PriorityHighIcon />}
               onClick={() => navigate('/priority')}
               sx={{
                 borderRadius: 2,
