@@ -1,4 +1,3 @@
-import React from 'react';
 import { AppBar, Toolbar, Typography, Button, Box, Container } from '@mui/material';
 import NotificationsIcon from '@mui/icons-material/Notifications';
 import PriorityHighIcon from '@mui/icons-material/PriorityHigh';
@@ -16,7 +15,7 @@ export default function Navbar() {
         <Toolbar disableGutters>
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, flexGrow: 1 }}>
             <NotificationsIcon sx={{ fontSize: 24 }} />
-            <Typography variant="h6" fontWeight="bold" letterSpacing={0.5}>
+            <Typography variant="h6" sx={{ fontWeight: 'bold', letterSpacing: 0.5 }}>
               Campus Notify
             </Typography>
           </Box>

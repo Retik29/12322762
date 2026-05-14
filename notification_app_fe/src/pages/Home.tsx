@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useCallback } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import axios from 'axios';
 import {
   Typography, Pagination, Box, CircularProgress,
@@ -6,7 +6,7 @@ import {
 } from '@mui/material';
 import NotificationsIcon from '@mui/icons-material/Notifications';
 import NotificationCard from '../components/NotificationCard';
-import { frontendLog, getAuthToken } from '../utils/logger';
+import { frontendLog } from '../utils/logger';
 import type { NotificationData } from '../types';
 
 const NOTIFICATION_TYPES = ['All', 'Event', 'Result', 'Placement'];
@@ -54,7 +54,7 @@ export default function Home() {
       <Paper elevation={0} sx={{ p: 3, mb: 3, background: 'linear-gradient(135deg, #0d47a1 0%, #1565c0 100%)', borderRadius: 3, color: 'white' }}>
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: 1 }}>
           <NotificationsIcon sx={{ fontSize: 28 }} />
-          <Typography variant="h5" fontWeight="bold">All Notifications</Typography>
+          <Typography variant="h5" sx={{ fontWeight: 'bold' }}>All Notifications</Typography>
         </Box>
         <Typography variant="body2" sx={{ opacity: 0.85 }}>
           Stay updated with placements, events, and results from your campus.

@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useCallback } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import axios from 'axios';
 import {
   Typography, Box, CircularProgress, Alert,
@@ -45,7 +45,7 @@ export default function PriorityInbox() {
       <Paper elevation={0} sx={{ p: 3, mb: 3, background: 'linear-gradient(135deg, #1565c0 0%, #1976d2 100%)', borderRadius: 3, color: 'white' }}>
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: 1 }}>
           <PriorityHighIcon sx={{ fontSize: 28 }} />
-          <Typography variant="h5" fontWeight="bold">Priority Inbox</Typography>
+          <Typography variant="h5" sx={{ fontWeight: 'bold' }}>Priority Inbox</Typography>
         </Box>
         <Typography variant="body2" sx={{ opacity: 0.85, mb: 2 }}>
           Top notifications ranked by importance (Placement &gt; Result &gt; Event) and recency.
@@ -76,7 +76,7 @@ export default function PriorityInbox() {
       </Paper>
 
       <Divider sx={{ mb: 3 }}>
-        <Typography variant="caption" color="text.secondary" fontWeight="bold">RANKED RESULTS</Typography>
+        <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 'bold' }}>RANKED RESULTS</Typography>
       </Divider>
 
       {error && <Alert severity="error" sx={{ mb: 2, borderRadius: 2 }}>{error}</Alert>}
