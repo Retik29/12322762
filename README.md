@@ -1,4 +1,4 @@
-# Affordmed Full Stack Test - 12322762
+# Full Stack Test Assignment Submission - 12322762
 
 This repository contains the complete implementation for the Affordmed Full Stack Campus Hiring Evaluation.
 
