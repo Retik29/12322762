@@ -1,13 +1,11 @@
-"use client";
-
 import React from 'react';
 import { AppBar, Toolbar, Typography, Button, Box } from '@mui/material';
-import { Notifications as NotificationsIcon, PriorityHigh as PriorityHighIcon } from '@mui/icons-material';
-import { useRouter, usePathname } from 'next/navigation';
+import { Notifications, PriorityHigh } from '@mui/icons-material';
+import { useNavigate, useLocation } from 'react-router-dom';
 
 export default function Navbar() {
-  const router = useRouter();
-  const pathname = usePathname();
+  const navigate = useNavigate();
+  const location = useLocation();
 
   return (
     <AppBar position="sticky">
@@ -18,17 +16,17 @@ export default function Navbar() {
         <Box sx={{ display: 'flex', gap: 2 }}>
           <Button 
             color="inherit" 
-            startIcon={<NotificationsIcon />}
-            onClick={() => router.push('/')}
-            sx={{ fontWeight: pathname === '/' ? 'bold' : 'normal', borderBottom: pathname === '/' ? '2px solid white' : 'none', borderRadius: 0 }}
+            startIcon={<Notifications />}
+            onClick={() => navigate('/')}
+            sx={{ fontWeight: location.pathname === '/' ? 'bold' : 'normal', borderBottom: location.pathname === '/' ? '2px solid white' : 'none', borderRadius: 0 }}
           >
             All Notifications
           </Button>
           <Button 
             color="inherit" 
-            startIcon={<PriorityHighIcon />}
-            onClick={() => router.push('/priority')}
-            sx={{ fontWeight: pathname === '/priority' ? 'bold' : 'normal', borderBottom: pathname === '/priority' ? '2px solid white' : 'none', borderRadius: 0 }}
+            startIcon={<PriorityHigh />}
+            onClick={() => navigate('/priority')}
+            sx={{ fontWeight: location.pathname === '/priority' ? 'bold' : 'normal', borderBottom: location.pathname === '/priority' ? '2px solid white' : 'none', borderRadius: 0 }}
           >
             Priority Inbox
           </Button>

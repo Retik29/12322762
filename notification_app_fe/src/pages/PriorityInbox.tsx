@@ -1,5 +1,3 @@
-"use client";
-
 import React, { useEffect, useState, useCallback } from 'react';
 import axios from 'axios';
 import { 
@@ -8,8 +6,8 @@ import {
   CircularProgress,
   Alert
 } from '@mui/material';
-import NotificationCard, { NotificationData } from '@/components/NotificationCard';
-import { frontendLog } from '@/utils/logger';
+import NotificationCard, { NotificationData } from '../components/NotificationCard';
+import { frontendLog } from '../utils/logger';
 
 export default function PriorityInbox() {
   const [notifications, setNotifications] = useState<NotificationData[]>([]);
@@ -20,7 +18,6 @@ export default function PriorityInbox() {
     setLoading(true);
     setError(null);
     try {
-      // Calls the notification_app_be backend route for Priority Inbox (Stage 6 Logic)
       const response = await axios.get("http://localhost:4000/api/priority-inbox");
 
       if (response.data && response.data.success && response.data.data) {

@@ -1,8 +1,6 @@
-"use client";
-
 import React, { useState } from 'react';
 import { Card, CardContent, Typography, Chip, Box, IconButton, Tooltip } from '@mui/material';
-import { CheckCircleOutline as CheckCircleOutlineIcon, CheckCircle as CheckCircleIcon } from '@mui/icons-material';
+import { CheckCircleOutline, CheckCircle } from '@mui/icons-material';
 import { format } from 'date-fns';
 
 export interface NotificationData {
@@ -10,7 +8,7 @@ export interface NotificationData {
   Type: "Event" | "Result" | "Placement";
   Message: string;
   Timestamp: string;
-  Score?: number; // Optional score for priority inbox
+  Score?: number;
 }
 
 interface NotificationCardProps {
@@ -23,9 +21,9 @@ export default function NotificationCard({ notification, onMarkRead }: Notificat
 
   const getChipColor = (type: string) => {
     switch (type) {
-      case 'Placement': return 'error'; // Red
-      case 'Result': return 'warning'; // Orange
-      case 'Event': return 'info'; // Blue
+      case 'Placement': return 'error';
+      case 'Result': return 'warning';
+      case 'Event': return 'info';
       default: return 'default';
     }
   };
@@ -72,7 +70,7 @@ export default function NotificationCard({ notification, onMarkRead }: Notificat
           </Box>
           <Tooltip title={isRead ? "Marked as read" : "Mark as read"}>
             <IconButton onClick={handleMarkRead} color={isRead ? 'default' : 'primary'} disabled={isRead}>
-              {isRead ? <CheckCircleIcon color="action" /> : <CheckCircleOutlineIcon />}
+              {isRead ? <CheckCircle color="action" /> : <CheckCircleOutline />}
             </IconButton>
           </Tooltip>
         </Box>

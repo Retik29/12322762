@@ -1,5 +1,3 @@
-"use client";
-
 import React, { useEffect, useState, useCallback } from 'react';
 import axios from 'axios';
 import { 
@@ -13,8 +11,8 @@ import {
   CircularProgress,
   Alert
 } from '@mui/material';
-import NotificationCard, { NotificationData } from '@/components/NotificationCard';
-import { frontendLog, getAuthToken } from '@/utils/logger';
+import NotificationCard, { NotificationData } from '../components/NotificationCard';
+import { frontendLog, getAuthToken } from '../utils/logger';
 
 export default function Home() {
   const [notifications, setNotifications] = useState<NotificationData[]>([]);
@@ -73,7 +71,7 @@ export default function Home() {
             label="Filter by Type"
             onChange={(e) => {
               setFilterType(e.target.value);
-              setPage(1); // reset to page 1 on filter change
+              setPage(1);
             }}
           >
             <MenuItem value="All">All</MenuItem>
@@ -104,7 +102,6 @@ export default function Home() {
             />
           ))}
           <Box sx={{ display: 'flex', justifyContent: 'center', mt: 4, mb: 4 }}>
-            {/* Hardcoding count to 10 assuming total pages is unknown or large */}
             <Pagination count={10} page={page} onChange={handlePageChange} color="primary" />
           </Box>
         </>
