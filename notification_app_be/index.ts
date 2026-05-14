@@ -101,6 +101,32 @@ class MinHeap {
   }
 }
 
+app.get('/api/notifications', async (req: Request, res: Response) => {
+  await Log("backend", "info", "route", "Received notifications request");
+
+  try {
+    const { limit = 10, page = 1, notification_type } = req.query;
+    let url = `http://4.224.186.213/evaluation-service/notifications?limit=${limit}&page=${page}`;
+    if (notification_type && notification_type !== 'All') {
+      url += `&notification_type=${notification_type}`;
+    }
+
+    const token = await getAuthToken();
+    const response = await axios.get(url, {
+      headers: {
+        Authorization: `Bearer ${token}`
+      }
+    });
+
+    await Log("backend", "info", "service", `Successfully fetched notifications page ${page}`);
+    res.status(200).json(response.data);
+
+  } catch (error: any) {
+    await Log("backend", "error", "handler", `Notifications route error: ${error.message}`);
+    res.status(500).json({ success: false, message: "Internal server error fetching notifications" });
+  }
+});
+
 app.get('/api/priority-inbox', async (req: Request, res: Response) => {
   await Log("backend", "info", "route", "Received priority inbox request");
 

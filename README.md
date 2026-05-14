@@ -2,6 +2,8 @@
 
 This repository contains the complete implementation for the Affordmed Full Stack Campus Hiring Evaluation.
 
+![alt text](<Screenshot (140).png>) ![alt text](<Screenshot (139).png>) ![alt text](<Screenshot (138).png>)
+
 ## Project Structure
 
 - `notification_system_design.md`: Contains the system design architecture, database schemas, query optimizations, and scaling discussions (Stages 1-5).

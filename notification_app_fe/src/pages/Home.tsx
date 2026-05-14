@@ -26,13 +26,10 @@ export default function Home() {
     setLoading(true);
     setError(null);
     try {
-      const token = await getAuthToken();
-      let url = `/evaluation-service/notifications?limit=${limit}&page=${page}`;
+      let url = `http://localhost:4000/api/notifications?limit=${limit}&page=${page}`;
       if (filterType !== 'All') url += `&notification_type=${filterType}`;
 
-      const response = await axios.get(url, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
+      const response = await axios.get(url);
 
       if (response.data?.notifications) {
         setNotifications(response.data.notifications);
