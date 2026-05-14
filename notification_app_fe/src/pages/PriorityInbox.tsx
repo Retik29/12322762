@@ -27,7 +27,7 @@ export default function PriorityInbox() {
         setNotifications([]);
       }
     } catch (err: any) {
-      console.error(err);
+      // Removed console.error
       setError("Failed to load priority inbox. Ensure the backend server is running on port 4000.");
       await frontendLog("error", "page", `Priority inbox fetch failed: ${err.message}`);
     } finally {

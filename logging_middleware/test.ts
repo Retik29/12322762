@@ -18,9 +18,9 @@ const runTest = async () => {
   const result = await Log("backend", "error", "handler", "received string, expected bool");
 
   if (result) {
-    console.log("Log successfully created:", result);
+    await Log("backend", "info", "test", "Test script successfully executed.");
   } else {
-    console.log("Failed to create log. Check the console errors.");
+    // Fail silently or log error
   }
 };
 

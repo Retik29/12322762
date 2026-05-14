@@ -45,7 +45,7 @@ export const getAuthToken = async (): Promise<string> => {
     
     return access_token;
   } catch (error: any) {
-    console.error("Failed to authenticate with logging service:", error?.response?.data || error.message);
+    // Authentication failed, fail silently to avoid console.log
     throw error;
   }
 };
@@ -72,6 +72,6 @@ export const Log = async (stack: Stack, level: Level, pkg: Package, message: str
 
     return response.data;
   } catch (error: any) {
-    console.error("Failed to send log to remote server:", error?.response?.data || error.message);
+    // Logging failed, fail silently to avoid console.log
   }
 };

@@ -44,7 +44,7 @@ export default function Home() {
         setNotifications([]);
       }
     } catch (err: any) {
-      console.error(err);
+      // Removed console.error
       setError("Failed to load notifications. Please try again later.");
       await frontendLog("error", "page", `Failed to fetch notifications: ${err.message}`);
     } finally {
