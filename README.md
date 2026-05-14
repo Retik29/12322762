@@ -1,4 +1,4 @@
-# Affordmed Full Stack Test - 12322762
+# Full Stack Test Assignment Submission - 12322762
 
 This repository contains the complete implementation for the Affordmed Full Stack Campus Hiring Evaluation.
 
@@ -43,8 +43,3 @@ The frontend runs on `http://localhost:3000`.
 - **Priority Inbox**: Custom Min-Heap algorithm calculated on the backend to fetch the top 10 notifications by weight and recency.
 - **Frontend App**: Clean Material UI implementation, responsive, handles loading and error states gracefully.
 
-## Next Steps for Submission
-- Start both the frontend and backend servers.
-- Take output screenshots of Postman/Insomnia hitting the backend.
-- Take desktop and mobile screenshots of the React application.
-- Record a short video navigating the app.
