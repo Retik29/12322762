@@ -1,22 +1,13 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import axios from 'axios';
 import {
-  Typography,
-  Select,
-  MenuItem,
-  FormControl,
-  Pagination,
-  Box,
-  CircularProgress,
-  Alert,
-  Paper,
-  Divider,
-  Chip,
-  Stack
+  Typography, Pagination, Box, CircularProgress,
+  Alert, Paper, Divider, Chip, Stack
 } from '@mui/material';
 import NotificationsIcon from '@mui/icons-material/Notifications';
-import NotificationCard, { NotificationData } from '../components/NotificationCard';
+import NotificationCard from '../components/NotificationCard';
 import { frontendLog, getAuthToken } from '../utils/logger';
+import { NotificationData } from '../types';
 
 const NOTIFICATION_TYPES = ['All', 'Event', 'Result', 'Placement'];
 const TYPE_COLORS: Record<string, 'default' | 'info' | 'warning' | 'error'> = {
@@ -27,9 +18,8 @@ export default function Home() {
   const [notifications, setNotifications] = useState<NotificationData[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-
   const [page, setPage] = useState(1);
-  const [filterType, setFilterType] = useState<string>('All');
+  const [filterType, setFilterType] = useState('All');
   const limit = 10;
 
   const fetchNotifications = useCallback(async () => {
@@ -38,24 +28,21 @@ export default function Home() {
     try {
       const token = await getAuthToken();
       let url = `http://4.224.186.213/evaluation-service/notifications?limit=${limit}&page=${page}`;
-      if (filterType !== 'All') {
-        url += `&notification_type=${filterType}`;
-      }
+      if (filterType !== 'All') url += `&notification_type=${filterType}`;
 
       const response = await axios.get(url, {
         headers: { Authorization: `Bearer ${token}` }
       });
 
-      if (response.data && response.data.notifications) {
+      if (response.data?.notifications) {
         setNotifications(response.data.notifications);
-        await frontendLog("info", "page", `Fetched page ${page} notifications`);
+        await frontendLog('info', 'page', `Fetched page ${page} notifications`);
       } else {
         setNotifications([]);
       }
     } catch (err: any) {
-      // Removed console.error
-      setError("Failed to load notifications. Please try again later.");
-      await frontendLog("error", "page", `Failed to fetch notifications: ${err.message}`);
+      setError('Failed to load notifications. Please try again later.');
+      await frontendLog('error', 'page', `Fetch failed: ${err.message}`);
     } finally {
       setLoading(false);
     }
@@ -67,7 +54,6 @@ export default function Home() {
 
   return (
     <Box>
-      {/* Header */}
       <Paper elevation={0} sx={{ p: 3, mb: 3, background: 'linear-gradient(135deg, #0d47a1 0%, #1565c0 100%)', borderRadius: 3, color: 'white' }}>
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: 1 }}>
           <NotificationsIcon sx={{ fontSize: 28 }} />
@@ -78,27 +64,20 @@ export default function Home() {
         </Typography>
       </Paper>
 
-      {/* Filters */}
       <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2, flexWrap: 'wrap', gap: 2 }}>
-        <Stack direction="row" spacing={1}>
+        <Stack direction="row" spacing={1} flexWrap="wrap">
           {NOTIFICATION_TYPES.map(type => (
             <Chip
               key={type}
               label={type}
               color={filterType === type ? TYPE_COLORS[type] : 'default'}
               variant={filterType === type ? 'filled' : 'outlined'}
-              onClick={() => {
-                setFilterType(type);
-                setPage(1);
-                frontendLog("info", "component", `User filtered by type: ${type}`);
-              }}
+              onClick={() => { setFilterType(type); setPage(1); frontendLog('info', 'component', `Filter: ${type}`); }}
               sx={{ cursor: 'pointer', fontWeight: filterType === type ? 'bold' : 'normal', transition: '0.2s' }}
             />
           ))}
         </Stack>
-        <Typography variant="caption" color="text.secondary">
-          Page {page} · {limit} per page
-        </Typography>
+        <Typography variant="caption" color="text.secondary">Page {page} · {limit} per page</Typography>
       </Box>
 
       <Divider sx={{ mb: 2 }} />
@@ -116,23 +95,15 @@ export default function Home() {
         </Paper>
       ) : (
         <>
-          {notifications.map((notif) => (
+          {notifications.map(notif => (
             <NotificationCard
               key={notif.ID}
               notification={notif}
-              onMarkRead={async (id) => {
-                await frontendLog("info", "component", `User marked notification as read`);
-              }}
+              onMarkRead={async () => { await frontendLog('info', 'component', 'Notification marked as read'); }}
             />
           ))}
           <Box sx={{ display: 'flex', justifyContent: 'center', mt: 3, mb: 2 }}>
-            <Pagination
-              count={10}
-              page={page}
-              onChange={(_, value) => setPage(value)}
-              color="primary"
-              shape="rounded"
-            />
+            <Pagination count={10} page={page} onChange={(_, v) => setPage(v)} color="primary" shape="rounded" />
           </Box>
         </>
       )}

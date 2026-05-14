@@ -1,26 +1,47 @@
-// Types re-defined locally — middleware types are erased at runtime (CJS dist)
-type Stack = "backend" | "frontend";
-type Level = "debug" | "info" | "warn" | "error" | "fatal";
-type Package = "api" | "component" | "hook" | "page" | "state" | "style" | "auth" | "config" | "middleware" | "utils";
+/**
+ * Frontend logger — mirrors the logging_middleware API but implemented
+ * directly with axios to avoid the CJS/ESM incompatibility in the browser.
+ */
+import axios from 'axios';
 
-// Dynamically require the middleware at runtime to avoid Vite ESM/CJS issues
-import { Log as _Log, initLogger, getAuthToken } from 'logging_middleware';
+const LOG_URL = 'http://4.224.186.213/evaluation-service/logs';
+const AUTH_URL = 'http://4.224.186.213/evaluation-service/auth';
 
-initLogger({
+const config = {
   email: import.meta.env.VITE_USER_EMAIL || '',
   name: import.meta.env.VITE_USER_NAME || '',
   rollNo: import.meta.env.VITE_USER_ROLLNO || '',
   accessCode: import.meta.env.VITE_USER_ACCESS_CODE || '',
   clientID: import.meta.env.VITE_USER_CLIENT_ID || '',
   clientSecret: import.meta.env.VITE_USER_CLIENT_SECRET || ''
-});
-
-export const frontendLog = async (level: Level, pkg: Package, message: string): Promise<void> => {
-  try {
-    await _Log("frontend", level, pkg, message);
-  } catch {
-    // Silent fail
-  }
 };
 
-export { getAuthToken };
+let cachedToken: string | null = null;
+let tokenExpiry: number | null = null;
+
+export const getAuthToken = async (): Promise<string> => {
+  if (cachedToken && tokenExpiry && Date.now() / 1000 < tokenExpiry - 60) {
+    return cachedToken;
+  }
+  const res = await axios.post(AUTH_URL, config);
+  cachedToken = res.data.access_token;
+  tokenExpiry = res.data.expires_in;
+  return cachedToken!;
+};
+
+export const frontendLog = async (
+  level: 'debug' | 'info' | 'warn' | 'error' | 'fatal',
+  pkg: string,
+  message: string
+): Promise<void> => {
+  try {
+    const token = await getAuthToken();
+    await axios.post(
+      LOG_URL,
+      { stack: 'frontend', level, package: pkg, message },
+      { headers: { Authorization: `Bearer ${token}` } }
+    );
+  } catch {
+    // Silent fail — never surface logger errors to UI
+  }
+};

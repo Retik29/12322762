@@ -1,21 +1,13 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import axios from 'axios';
 import {
-  Typography,
-  Box,
-  CircularProgress,
-  Alert,
-  FormControl,
-  InputLabel,
-  Select,
-  MenuItem,
-  Chip,
-  Paper,
-  Divider
+  Typography, Box, CircularProgress, Alert,
+  FormControl, Select, MenuItem, Chip, Paper, Divider
 } from '@mui/material';
 import PriorityHighIcon from '@mui/icons-material/PriorityHigh';
-import NotificationCard, { NotificationData } from '../components/NotificationCard';
+import NotificationCard from '../components/NotificationCard';
 import { frontendLog } from '../utils/logger';
+import { NotificationData } from '../types';
 
 const TOP_N_OPTIONS = [5, 10, 15, 20];
 
@@ -23,24 +15,22 @@ export default function PriorityInbox() {
   const [notifications, setNotifications] = useState<NotificationData[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [topN, setTopN] = useState<number>(10);
+  const [topN, setTopN] = useState(10);
 
   const fetchPriorityInbox = useCallback(async (n: number) => {
     setLoading(true);
     setError(null);
     try {
       const response = await axios.get(`http://localhost:4000/api/priority-inbox?limit=${n}`);
-
-      if (response.data && response.data.success && response.data.data) {
+      if (response.data?.success && response.data?.data) {
         setNotifications(response.data.data);
-        await frontendLog("info", "page", `Fetched top ${n} priority notifications`);
+        await frontendLog('info', 'page', `Fetched top ${n} priority notifications`);
       } else {
         setNotifications([]);
       }
     } catch (err: any) {
-      // Removed console.error
-      setError("Failed to load priority inbox. Ensure the backend server is running on port 4000.");
-      await frontendLog("error", "page", `Priority inbox fetch failed: ${err.message}`);
+      setError('Failed to load priority inbox. Ensure the backend server is running on port 4000.');
+      await frontendLog('error', 'page', `Priority fetch failed: ${err.message}`);
     } finally {
       setLoading(false);
     }
@@ -52,7 +42,6 @@ export default function PriorityInbox() {
 
   return (
     <Box>
-      {/* Header */}
       <Paper elevation={0} sx={{ p: 3, mb: 3, background: 'linear-gradient(135deg, #1565c0 0%, #1976d2 100%)', borderRadius: 3, color: 'white' }}>
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: 1 }}>
           <PriorityHighIcon sx={{ fontSize: 28 }} />
@@ -69,13 +58,11 @@ export default function PriorityInbox() {
               onChange={(e) => {
                 const n = Number(e.target.value);
                 setTopN(n);
-                frontendLog("info", "component", `User changed priority limit to ${n}`);
+                frontendLog('info', 'component', `Priority limit changed to ${n}`);
               }}
               sx={{ color: 'white', '.MuiSvgIcon-root': { color: 'white' }, '.MuiOutlinedInput-notchedOutline': { borderColor: 'rgba(255,255,255,0.4)' } }}
             >
-              {TOP_N_OPTIONS.map(n => (
-                <MenuItem key={n} value={n}>{n}</MenuItem>
-              ))}
+              {TOP_N_OPTIONS.map(n => <MenuItem key={n} value={n}>{n}</MenuItem>)}
             </Select>
           </FormControl>
           {!loading && (
@@ -88,7 +75,6 @@ export default function PriorityInbox() {
         </Box>
       </Paper>
 
-      {/* Divider with label */}
       <Divider sx={{ mb: 3 }}>
         <Typography variant="caption" color="text.secondary" fontWeight="bold">RANKED RESULTS</Typography>
       </Divider>
@@ -121,9 +107,7 @@ export default function PriorityInbox() {
               <Box sx={{ flexGrow: 1 }}>
                 <NotificationCard
                   notification={notif}
-                  onMarkRead={async (id) => {
-                    await frontendLog("info", "component", `User marked priority notification as read`);
-                  }}
+                  onMarkRead={async () => { await frontendLog('info', 'component', 'Priority notification marked read'); }}
                 />
               </Box>
             </Box>
