@@ -105,6 +105,8 @@ app.get('/api/priority-inbox', async (req: Request, res: Response) => {
   await Log("backend", "info", "route", "Received priority inbox request");
 
   try {
+    const topN = Math.min(Math.max(parseInt(req.query.limit as string) || 10, 1), 50);
+
     const token = await getAuthToken();
     const response = await axios.get("http://4.224.186.213/evaluation-service/notifications", {
       headers: {
@@ -120,19 +122,20 @@ app.get('/api/priority-inbox', async (req: Request, res: Response) => {
 
     await Log("backend", "info", "service", `Fetched ${notifications.length} notifications`);
 
-    const top10Heap = new MinHeap(10);
+    const topNHeap = new MinHeap(topN);
     notifications.forEach(notif => {
       const score = calculateScore(notif);
-      top10Heap.insert({ ...notif, Score: score });
+      topNHeap.insert({ ...notif, Score: score });
     });
 
-    const top10 = top10Heap.getSortedArray();
+    const topNotifications = topNHeap.getSortedArray();
 
-    await Log("backend", "info", "service", "Successfully processed priority list");
+    await Log("backend", "info", "service", `Processed top ${topN} priority notifications`);
     
     res.status(200).json({
       success: true,
-      data: top10
+      count: topNotifications.length,
+      data: topNotifications
     });
 
   } catch (error: any) {

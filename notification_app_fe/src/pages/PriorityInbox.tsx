@@ -1,28 +1,39 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import axios from 'axios';
-import { 
-  Typography, 
-  Box, 
+import {
+  Typography,
+  Box,
   CircularProgress,
-  Alert
+  Alert,
+  FormControl,
+  InputLabel,
+  Select,
+  MenuItem,
+  Chip,
+  Paper,
+  Divider
 } from '@mui/material';
+import { PriorityHigh } from '@mui/icons-material';
 import NotificationCard, { NotificationData } from '../components/NotificationCard';
 import { frontendLog } from '../utils/logger';
+
+const TOP_N_OPTIONS = [5, 10, 15, 20];
 
 export default function PriorityInbox() {
   const [notifications, setNotifications] = useState<NotificationData[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [topN, setTopN] = useState<number>(10);
 
-  const fetchPriorityInbox = useCallback(async () => {
+  const fetchPriorityInbox = useCallback(async (n: number) => {
     setLoading(true);
     setError(null);
     try {
-      const response = await axios.get("http://localhost:4000/api/priority-inbox");
+      const response = await axios.get(`http://localhost:4000/api/priority-inbox?limit=${n}`);
 
       if (response.data && response.data.success && response.data.data) {
         setNotifications(response.data.data);
-        await frontendLog("info", "page", "Fetched priority inbox from backend");
+        await frontendLog("info", "page", `Fetched top ${n} priority notifications`);
       } else {
         setNotifications([]);
       }
@@ -36,35 +47,82 @@ export default function PriorityInbox() {
   }, []);
 
   useEffect(() => {
-    fetchPriorityInbox();
-  }, [fetchPriorityInbox]);
+    fetchPriorityInbox(topN);
+  }, [fetchPriorityInbox, topN]);
 
   return (
     <Box>
-      <Typography variant="h5" fontWeight="bold" sx={{ mb: 3 }}>
-        Priority Inbox (Top 10)
-      </Typography>
+      {/* Header */}
+      <Paper elevation={0} sx={{ p: 3, mb: 3, background: 'linear-gradient(135deg, #1565c0 0%, #1976d2 100%)', borderRadius: 3, color: 'white' }}>
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: 1 }}>
+          <PriorityHigh sx={{ fontSize: 28 }} />
+          <Typography variant="h5" fontWeight="bold">Priority Inbox</Typography>
+        </Box>
+        <Typography variant="body2" sx={{ opacity: 0.85, mb: 2 }}>
+          Top notifications ranked by importance (Placement &gt; Result &gt; Event) and recency.
+        </Typography>
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+          <Typography variant="body2" sx={{ opacity: 0.9 }}>Show top:</Typography>
+          <FormControl size="small" sx={{ minWidth: 90, background: 'rgba(255,255,255,0.15)', borderRadius: 1 }}>
+            <Select
+              value={topN}
+              onChange={(e) => {
+                const n = Number(e.target.value);
+                setTopN(n);
+                frontendLog("info", "component", `User changed priority limit to ${n}`);
+              }}
+              sx={{ color: 'white', '.MuiSvgIcon-root': { color: 'white' }, '.MuiOutlinedInput-notchedOutline': { borderColor: 'rgba(255,255,255,0.4)' } }}
+            >
+              {TOP_N_OPTIONS.map(n => (
+                <MenuItem key={n} value={n}>{n}</MenuItem>
+              ))}
+            </Select>
+          </FormControl>
+          {!loading && (
+            <Chip
+              label={`${notifications.length} results`}
+              size="small"
+              sx={{ background: 'rgba(255,255,255,0.2)', color: 'white', fontWeight: 'bold' }}
+            />
+          )}
+        </Box>
+      </Paper>
 
-      {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}
+      {/* Divider with label */}
+      <Divider sx={{ mb: 3 }}>
+        <Typography variant="caption" color="text.secondary" fontWeight="bold">RANKED RESULTS</Typography>
+      </Divider>
+
+      {error && <Alert severity="error" sx={{ mb: 2, borderRadius: 2 }}>{error}</Alert>}
 
       {loading ? (
-        <Box sx={{ display: 'flex', justifyContent: 'center', p: 5 }}>
+        <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 2, p: 6 }}>
           <CircularProgress />
+          <Typography variant="body2" color="text.secondary">Computing priority scores...</Typography>
         </Box>
       ) : notifications.length === 0 && !error ? (
-        <Typography color="text.secondary">No priority notifications found.</Typography>
+        <Paper elevation={0} sx={{ p: 5, textAlign: 'center', borderRadius: 3, border: '2px dashed #e0e0e0' }}>
+          <Typography color="text.secondary">No priority notifications found.</Typography>
+        </Paper>
       ) : (
         <>
           {notifications.map((notif, index) => (
-            <Box key={notif.ID} sx={{ display: 'flex', gap: 2, alignItems: 'center' }}>
-              <Typography variant="h6" color="text.secondary" sx={{ minWidth: 30 }}>
+            <Box key={notif.ID} sx={{ display: 'flex', gap: 1.5, alignItems: 'flex-start', mb: 0.5 }}>
+              <Box sx={{
+                minWidth: 32, height: 32, borderRadius: '50%',
+                background: index === 0 ? '#ffd700' : index === 1 ? '#c0c0c0' : index === 2 ? '#cd7f32' : '#e3f2fd',
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                fontWeight: 'bold', fontSize: 13,
+                color: index < 3 ? '#333' : '#1976d2',
+                mt: 2, flexShrink: 0, boxShadow: index < 3 ? 1 : 0
+              }}>
                 #{index + 1}
-              </Typography>
+              </Box>
               <Box sx={{ flexGrow: 1 }}>
-                <NotificationCard 
-                  notification={notif} 
+                <NotificationCard
+                  notification={notif}
                   onMarkRead={async (id) => {
-                    await frontendLog("info", "component", `User marked priority notification ${id} as read`);
+                    await frontendLog("info", "component", `User marked priority notification as read`);
                   }}
                 />
               </Box>
