@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { Card, CardContent, Typography, Chip, Box, IconButton, Tooltip } from '@mui/material';
+import type { ChipProps } from '@mui/material';
 import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutlined';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import { format } from 'date-fns';
@@ -13,7 +14,7 @@ interface NotificationCardProps {
 export default function NotificationCard({ notification, onMarkRead }: NotificationCardProps) {
   const [isRead, setIsRead] = useState(false);
 
-  const getChipColor = (type: string) => {
+  const getChipColor = (type: string): ChipProps['color'] => {
     switch (type) {
       case 'Placement': return 'error';
       case 'Result': return 'warning';
@@ -45,7 +46,7 @@ export default function NotificationCard({ notification, onMarkRead }: Notificat
             <Box sx={{ display: 'flex', alignItems: 'center', mb: 1, gap: 1, flexWrap: 'wrap' }}>
               <Chip
                 label={notification.Type}
-                color={getChipColor(notification.Type) as any}
+                color={getChipColor(notification.Type)}
                 size="small"
                 sx={{ fontWeight: 'bold' }}
               />

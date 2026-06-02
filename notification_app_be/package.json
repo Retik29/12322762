@@ -18,6 +18,7 @@
     "dotenv": "^17.4.2",
     "express": "^5.2.1",
     "logging_middleware": "file:../logging_middleware",
+    "mongodb": "^7.2.0",
     "ts-node": "^10.9.2",
     "typescript": "^6.0.3"
   },

@@ -1,45 +1,71 @@
 # Full Stack Test Assignment Submission - 12322762
 
-This repository contains the complete implementation for the Affordmed Full Stack Campus Hiring Evaluation.
+This repository contains a MERN-stack implementation for the Affordmed Full Stack Campus Hiring Evaluation.
 
-![alt text](<Screenshot (140).png>) ![alt text](<Screenshot (139).png>) ![alt text](<Screenshot (138).png>)
+## Tech Stack
+
+- **MongoDB**: Notification persistence when MongoDB is available locally.
+- **Express.js**: Backend REST API.
+- **React**: Frontend UI.
+- **Node.js**: Backend runtime.
+
+Supporting tools/libraries: TypeScript, Vite, Axios, Material UI, and the required logging middleware.
 
 ## Project Structure
 
-- `notification_system_design.md`: Contains the system design architecture, database schemas, query optimizations, and scaling discussions (Stages 1-5).
-- `logging_middleware/`: Reusable TypeScript package for authenticated remote logging.
-- `notification_app_be/`: Node.js Express server implementing the Priority Inbox algorithm using a Min-Heap (Stage 6).
-- `notification_app_fe/`: Next.js App Router frontend application with Material UI, displaying paginated and priority notifications (Stage 7).
+- `notification_system_design.md`: Stages 1-5 design answers rewritten for MERN.
+- `logging_middleware/`: Reusable logging package for the evaluation service.
+- `notification_app_be/`: Node.js + Express backend with MongoDB support and in-memory demo fallback.
+- `notification_app_fe/`: React frontend that consumes the backend APIs.
 
-## Setup Instructions
-
-### 1. Backend Setup
+## Backend Setup
 
 ```bash
 cd notification_app_be
-# Install dependencies
 npm install
-
-# Build and start the backend
-npx tsc
-node dist/index.js
+npm run build
+npm start
 ```
-The backend runs on `http://localhost:4000`.
 
-### 2. Frontend Setup
+Backend URL:
+
+```text
+http://localhost:4000
+```
+
+Useful endpoints:
+
+- `GET /api/health`
+- `GET /api/notifications?limit=10&page=1`
+- `GET /api/notifications/unread`
+- `PATCH /api/notifications/:id/read`
+- `POST /api/notifications`
+- `GET /api/priority-inbox?limit=10`
+
+MongoDB is optional for the demo. If MongoDB is running on `mongodb://127.0.0.1:27017`, the backend uses the `campus_notify` database. If MongoDB is unavailable, the backend automatically uses in-memory seed data so the frontend still works.
+
+## Frontend Setup
 
 ```bash
 cd notification_app_fe
-# Install dependencies
 npm install
-
-# Start the development server
 npm run dev
 ```
-The frontend runs on `http://localhost:3000`.
 
-## Features
-- **Centralized Logging**: Extensively logs to the remote evaluation server. No `console.log` is used.
-- **Priority Inbox**: Custom Min-Heap algorithm calculated on the backend to fetch the top 10 notifications by weight and recency.
-- **Frontend App**: Clean Material UI implementation, responsive, handles loading and error states gracefully.
+Frontend URL:
 
+```text
+http://localhost:3000
+```
+
+## Demo Checklist
+
+1. Start the backend and open `http://localhost:4000/api/health`.
+2. Start the frontend and open `http://localhost:3000`.
+3. Show notification filtering on the home page.
+4. Open the Priority Inbox page and show the Min-Heap ranked notifications.
+5. Click the mark-as-read button to show frontend-to-backend interaction.
+
+## Notes
+
+The remote evaluation notification service may reject requests after the evaluation session ends. The backend still attempts the remote service first, then falls back to the MERN local store so the project remains demo-ready.

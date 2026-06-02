@@ -14,6 +14,10 @@ const TYPE_COLORS: Record<string, 'default' | 'info' | 'warning' | 'error'> = {
   All: 'default', Event: 'info', Result: 'warning', Placement: 'error'
 };
 
+const getErrorMessage = (error: unknown) => {
+  return error instanceof Error ? error.message : 'Unknown error';
+};
+
 export default function Home() {
   const [notifications, setNotifications] = useState<NotificationData[]>([]);
   const [loading, setLoading] = useState(true);
@@ -37,16 +41,18 @@ export default function Home() {
       } else {
         setNotifications([]);
       }
-    } catch (err: any) {
+    } catch (err: unknown) {
       setError('Failed to load notifications. Please try again later.');
-      await frontendLog('error', 'page', `Fetch failed: ${err.message}`);
+      await frontendLog('error', 'page', `Fetch failed: ${getErrorMessage(err)}`);
     } finally {
       setLoading(false);
     }
   }, [page, filterType]);
 
   useEffect(() => {
-    fetchNotifications();
+    // This effect intentionally synchronizes backend data with page/filter changes.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    void fetchNotifications();
   }, [fetchNotifications]);
 
   return (
@@ -96,7 +102,10 @@ export default function Home() {
             <NotificationCard
               key={notif.ID}
               notification={notif}
-              onMarkRead={async () => { await frontendLog('info', 'component', 'Notification marked as read'); }}
+              onMarkRead={async (id) => {
+                await axios.patch(`http://localhost:4000/api/notifications/${id}/read`);
+                await frontendLog('info', 'component', 'Notification marked as read');
+              }}
             />
           ))}
           <Box sx={{ display: 'flex', justifyContent: 'center', mt: 3, mb: 2 }}>

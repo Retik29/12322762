@@ -1,6 +1,6 @@
 import { Log, initLogger } from "./index";
 
-// TODO: Replace these placeholders with your actual details obtained from registration
+// Assignment credentials used to verify the reusable logging middleware.
 const authConfig = {
   email: "retiknyadav614@gmail.com",
   name: "Retik Kumar Yadav",

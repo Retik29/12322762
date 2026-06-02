@@ -11,6 +11,10 @@ import type { NotificationData } from '../types';
 
 const TOP_N_OPTIONS = [5, 10, 15, 20];
 
+const getErrorMessage = (error: unknown) => {
+  return error instanceof Error ? error.message : 'Unknown error';
+};
+
 export default function PriorityInbox() {
   const [notifications, setNotifications] = useState<NotificationData[]>([]);
   const [loading, setLoading] = useState(true);
@@ -28,16 +32,18 @@ export default function PriorityInbox() {
       } else {
         setNotifications([]);
       }
-    } catch (err: any) {
+    } catch (err: unknown) {
       setError('Failed to load priority inbox. Ensure the backend server is running on port 4000.');
-      await frontendLog('error', 'page', `Priority fetch failed: ${err.message}`);
+      await frontendLog('error', 'page', `Priority fetch failed: ${getErrorMessage(err)}`);
     } finally {
       setLoading(false);
     }
   }, []);
 
   useEffect(() => {
-    fetchPriorityInbox(topN);
+    // This effect intentionally synchronizes backend data with the selected limit.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    void fetchPriorityInbox(topN);
   }, [fetchPriorityInbox, topN]);
 
   return (
@@ -107,7 +113,10 @@ export default function PriorityInbox() {
               <Box sx={{ flexGrow: 1 }}>
                 <NotificationCard
                   notification={notif}
-                  onMarkRead={async () => { await frontendLog('info', 'component', 'Priority notification marked read'); }}
+                  onMarkRead={async (id) => {
+                    await axios.patch(`http://localhost:4000/api/notifications/${id}/read`);
+                    await frontendLog('info', 'component', 'Priority notification marked read');
+                  }}
                 />
               </Box>
             </Box>

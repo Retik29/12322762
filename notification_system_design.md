@@ -1,228 +1,298 @@
 # Notification System Design
 
-## Stage 1
-### REST API Design
-The notification platform needs to support fetching notifications, marking them as read, and receiving new ones in real-time.
+This submission follows a MERN stack:
 
-#### 1. Get All Notifications (with pagination and filtering)
-- **Endpoint**: `GET /notifications`
-- **Headers**:
-  ```json
-  {
-    "Authorization": "Bearer <TOKEN>",
-    "Content-Type": "application/json"
-  }
-  ```
+- **MongoDB** for notification persistence.
+- **Express.js** for REST APIs.
+- **React** for the frontend.
+- **Node.js** for the backend runtime.
+
+The implementation also keeps the remote evaluation logging middleware required by the assignment.
+
+---
+
+## Stage 1
+
+### REST API Design
+
+The notification platform supports fetching notifications, filtering by type, marking notifications as read, and creating new notifications.
+
+#### 1. Get All Notifications
+
+- **Endpoint**: `GET /api/notifications`
 - **Query Parameters**:
   - `limit`: Number of items per page.
   - `page`: Page number.
-  - `notification_type`: Filter by "Event", "Result", or "Placement".
-- **Response** (200 OK):
-  ```json
-  {
-    "notifications": [
-      {
-        "ID": "uuid",
-        "Type": "Placement",
-        "Message": "Company XYZ hiring",
-        "Timestamp": "2026-04-22 17:51:18",
-        "isRead": false
-      }
-    ],
-    "pagination": {
-      "currentPage": 1,
-      "totalPages": 5,
-      "totalItems": 50
+  - `notification_type`: Optional filter by `Event`, `Result`, or `Placement`.
+- **Response**:
+
+```json
+{
+  "success": true,
+  "source": "mongo",
+  "page": 1,
+  "limit": 10,
+  "total": 25,
+  "notifications": [
+    {
+      "ID": "uuid",
+      "Type": "Placement",
+      "Message": "Company XYZ hiring",
+      "Timestamp": "2026-04-22T17:51:18.000Z",
+      "isRead": false
     }
-  }
-  ```
+  ]
+}
+```
 
 #### 2. Get Unread Notifications
-- **Endpoint**: `GET /notifications/unread`
-- **Headers**: Same as above.
-- **Response** (200 OK): Returns a list of unread notifications matching the schema above.
+
+- **Endpoint**: `GET /api/notifications/unread`
+- **Response**: Same shape as the list API, but only includes notifications where `isRead !== true`.
 
 #### 3. Mark Notification as Read
-- **Endpoint**: `PATCH /notifications/:id/read`
-- **Headers**: Same as above.
-- **Response** (200 OK):
-  ```json
-  {
-    "success": true,
-    "message": "Notification marked as read"
-  }
-  ```
+
+- **Endpoint**: `PATCH /api/notifications/:id/read`
+- **Response**:
+
+```json
+{
+  "success": true,
+  "message": "Notification marked as read"
+}
+```
 
 #### 4. Create Notification
-- **Endpoint**: `POST /notifications`
-- **Headers**: Same as above.
-- **Request Body**:
-  ```json
-  {
-    "type": "Event",
-    "message": "Tech Fest 2026",
-    "studentIds": ["1042", "1043"]
-  }
-  ```
-- **Response** (201 Created):
-  ```json
-  {
-    "success": true,
-    "message": "Notification queued for delivery"
-  }
-  ```
 
-### Real-Time Notification Mechanism
-For real-time delivery of notifications as they are created, I propose using **WebSockets** (specifically through libraries like Socket.IO). WebSockets provide a persistent, bidirectional communication channel between the client and server. When a new notification is created in the system, the server can immediately push the event payload to the connected client without requiring the client to constantly poll the server.
+- **Endpoint**: `POST /api/notifications`
+- **Request Body**:
+
+```json
+{
+  "type": "Event",
+  "message": "Tech Fest 2026"
+}
+```
+
+- **Response**:
+
+```json
+{
+  "success": true,
+  "message": "Notification created",
+  "notification": {
+    "ID": "local-1778767164000",
+    "Type": "Event",
+    "Message": "Tech Fest 2026",
+    "Timestamp": "2026-06-02T12:00:00.000Z",
+    "isRead": false
+  }
+}
+```
+
+### Delivery Model
+
+For this assignment demo, the frontend fetches notifications through REST APIs. In a production MERN app, real-time delivery can be added with Node.js server-sent events or WebSocket support, while still keeping MongoDB as the source of truth.
 
 ---
 
 ## Stage 2
-### Persistent Storage (Database)
-**Choice**: **PostgreSQL**
-**Reasoning**: PostgreSQL is a robust, open-source relational database that offers strong ACID compliance, excellent indexing capabilities (B-tree, GIN), and support for JSONB data types if semi-structured data is ever needed. Notifications naturally form relationships with students (users), making a relational schema highly appropriate.
 
-### Database Schema
-```sql
-CREATE TYPE notification_type AS ENUM ('Event', 'Result', 'Placement');
+### Persistent Storage
 
-CREATE TABLE students (
-    id SERIAL PRIMARY KEY,
-    name VARCHAR(255) NOT NULL,
-    email VARCHAR(255) UNIQUE NOT NULL
-);
+**Choice**: **MongoDB**
 
-CREATE TABLE notifications (
-    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    student_id INT NOT NULL REFERENCES students(id) ON DELETE CASCADE,
-    type notification_type NOT NULL,
-    message TEXT NOT NULL,
-    is_read BOOLEAN DEFAULT FALSE,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-);
+MongoDB fits the notification use case well because each notification is naturally represented as a document. The schema can evolve without relational migrations, and MongoDB indexes support fast reads by type, read status, and timestamp.
 
--- Indexing for faster retrieval of a student's notifications
-CREATE INDEX idx_notifications_student_id ON notifications(student_id);
-CREATE INDEX idx_notifications_student_unread ON notifications(student_id, is_read);
+### MongoDB Collection
+
+Collection name: `notifications`
+
+```json
+{
+  "ID": "fallback-placement-001",
+  "Type": "Placement",
+  "Message": "Placement drive opened for Software Engineer roles.",
+  "Timestamp": "2026-05-14T09:30:00.000Z",
+  "isRead": false
+}
 ```
 
-### Scaling Challenges
-As data volume increases to millions of notifications:
-1. **Read/Write bottlenecks**: Fetching notifications for every user continuously can saturate DB connections and I/O.
-2. **Storage Costs**: Storing old, read notifications consumes significant disk space.
+### Indexes
 
-**Solutions**:
-1. **Caching Layer**: Introduce Redis to cache the top unread notifications per user.
-2. **Data Archival / TTL**: Implement a cron job to move notifications older than 30 days to cold storage (e.g., AWS S3) or simply delete them.
-3. **Database Sharding**: Partition the `notifications` table by date or hash partition by `student_id`.
-
-### Queries Based on Stage 1
-**Get Notifications (Paginated)**:
-```sql
-SELECT id, type, message, created_at, is_read 
-FROM notifications 
-WHERE student_id = 1042 
-ORDER BY created_at DESC 
-LIMIT 10 OFFSET 0;
+```javascript
+db.notifications.createIndex({ ID: 1 }, { unique: true })
+db.notifications.createIndex({ Type: 1, Timestamp: -1 })
+db.notifications.createIndex({ isRead: 1, Timestamp: -1 })
 ```
 
-**Mark as Read**:
-```sql
-UPDATE notifications SET is_read = TRUE WHERE id = 'uuid-goes-here' AND student_id = 1042;
-```
+These indexes support:
+
+- Fast lookup when marking a notification as read.
+- Fast filtering by notification type.
+- Fast unread notification queries ordered by newest first.
 
 ---
 
 ## Stage 3
+
 ### Query Optimization Analysis
-**Query**:
-```sql
-SELECT * FROM notifications WHERE studentID = 1042 AND isRead = false ORDER BY createdAt ASC ;
+
+Original query:
+
+```javascript
+db.notifications.find({
+  studentID: 1042,
+  isRead: false
+}).sort({ createdAt: 1 })
 ```
-**Is this accurate?**
-It is syntactically accurate for fetching unread notifications. However, ordering by `createdAt ASC` fetches the *oldest* notifications first. Typically, users want to see the *newest* notifications first, so `DESC` would be better for UX.
 
-**Why is this slow?**
-With 5,000,000 records, the database engine must perform a "Full Table Scan" to find rows where `studentID = 1042` and `isRead = false`, and then perform a potentially expensive sort operation in memory.
+### Accuracy
 
-**Suggested Changes & Computation Cost:**
-1. **Change the Sort Order**: Use `ORDER BY createdAt DESC`.
-2. **Add a Composite Index**:
-   ```sql
-   CREATE INDEX idx_student_unread_created ON notifications(studentID, isRead, createdAt DESC);
-   ```
-   **Computation Cost**: With the composite index, the DB can perform an Index Seek. The time complexity drops from O(N) (table scan) to O(log N) (B-tree traversal). The query will execute in single-digit milliseconds.
+The query is logically close, but sorting by `createdAt: 1` returns the oldest notifications first. For notification inbox UX, newest-first sorting is usually better.
 
-**Is adding indexes on every column effective?**
-**No.** Indexes speed up read operations but significantly slow down write operations (INSERT, UPDATE, DELETE) because every index must be updated synchronously. Furthermore, indexes consume memory and disk space. We should only index columns used frequently in `WHERE`, `JOIN`, or `ORDER BY` clauses.
+Recommended query:
+
+```javascript
+db.notifications.find({
+  studentID: 1042,
+  isRead: false
+}).sort({ createdAt: -1 })
+```
+
+### Performance Problem
+
+With millions of notification documents, MongoDB may scan too many documents unless the query fields and sort field are indexed together.
+
+Recommended compound index:
+
+```javascript
+db.notifications.createIndex({
+  studentID: 1,
+  isRead: 1,
+  createdAt: -1
+})
+```
+
+With this index, MongoDB can locate one student's unread notifications and return them in newest-first order without an expensive in-memory sort.
 
 ### Placement Query
-Find all students who got a placement notification in the last 7 days:
-```sql
-SELECT DISTINCT s.id, s.name, s.email 
-FROM students s
-JOIN notifications n ON s.id = n.student_id
-WHERE n.type = 'Placement' 
-  AND n.created_at >= NOW() - INTERVAL '7 days';
+
+Find all placement notifications created in the last 7 days:
+
+```javascript
+db.notifications.find({
+  Type: "Placement",
+  Timestamp: {
+    $gte: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString()
+  }
+}).sort({ Timestamp: -1 })
 ```
 
 ---
 
 ## Stage 4
-### Performance Improvements
-Fetching notifications on every page load overwhelms the DB. 
 
-**Solutions**:
-1. **Redis Caching (Recommended)**: 
-   Cache the most recent 50 notifications or the unread count in Redis (In-Memory Key-Value store). On page load, the API fetches from Redis first. If a cache miss occurs, it falls back to the database.
-   *Tradeoff*: Cache invalidation can be tricky. There might be a slight eventual consistency delay between the DB and Redis, but for notifications, sub-second staleness is acceptable.
-2. **WebSockets (Push vs Pull)**:
-   Instead of the client polling the DB on every page load, load the state once and maintain an active WebSocket connection. The server pushes updates to the client.
-   *Tradeoff*: Maintaining thousands of concurrent WebSocket connections requires dedicated infrastructure (like Socket.IO servers/Redis PubSub) and higher server memory.
-3. **Cursor-Based Pagination**:
-   Instead of `OFFSET`, which scans and skips rows linearly, use a cursor (e.g., the last `createdAt` timestamp).
-   *Tradeoff*: The frontend implementation is slightly more complex, and users cannot jump to specific page numbers (e.g., "Page 5").
+### Performance Improvements Inside MERN
+
+1. **MongoDB compound indexes**
+   Use indexes that match the most common query patterns: unread notifications, type filters, and timestamp sorting.
+
+2. **Pagination**
+   Keep `limit` and `page` for the assignment UI. For very large datasets, cursor pagination using the last `Timestamp` would scale better than large `skip` values.
+
+3. **Lean API responses**
+   Return only fields needed by the frontend: `ID`, `Type`, `Message`, `Timestamp`, and `isRead`.
+
+4. **Backend fallback behavior**
+   The implemented backend uses MongoDB when available. If MongoDB or the remote evaluation service is down, it falls back to in-memory seed data so the app remains demo-ready.
 
 ---
 
 ## Stage 5
+
 ### Reliable Bulk Notifications
-**Shortcomings of the proposed pseudocode**:
-1. **Synchronous & Blocking**: Sending 50,000 emails sequentially in a loop will take hours and block the thread.
-2. **No Fault Tolerance/Retries**: The logs showed the process failed for 200 students. The script has no mechanism to resume or retry only the failed ones.
-3. **Coupled Operations**: If `send_email` fails, does it still save to the DB? Should it?
 
-**Should saving to DB and sending email happen together?**
-**No.** They should be decoupled. Saving to the DB is a fast, internal operation. Sending an email relies on an external 3rd-party API (like SendGrid/AWS SES) which is comparatively slow and prone to rate limits or network outages.
+The original synchronous pseudocode is risky because sending thousands of notifications one by one can block the Node.js process and fail halfway without recovery.
 
-**Redesign Strategy**: Use an Async Task Queue (e.g., BullMQ, RabbitMQ). 
-1. The main API quickly creates "Notification Jobs" and pushes them to a message queue. 
-2. Background worker processes consume the queue concurrently.
-3. The queue handles retries, delays, and routes permanent failures to a Dead Letter Queue (DLQ).
+### MERN-Only Redesign
 
-### Revised Pseudocode
-```python
-function notify_all(student_ids: array, message: string):
-    # 1. Bulk insert to database (fast operation)
-    bulk_insert_notifications_to_db(student_ids, message)
-    
-    # 2. Push jobs to message queue for async processing
-    for student_id in student_ids:
-        job_payload = { "student_id": student_id, "message": message }
-        MessageQueue.push("email_notification_queue", job_payload)
-        
-        # Real-time WebSockets can be emitted asynchronously via PubSub
-        RedisPubSub.publish("realtime_notifications", job_payload)
+Use MongoDB to persist notification jobs and process them in small batches from a Node.js worker loop.
 
-# ----------------------------------------------------
-# Worker Process (runs asynchronously in the background)
-# ----------------------------------------------------
-@Worker("email_notification_queue", retries=3, backoff="exponential")
-function process_email_job(job):
-    try:
-        send_email(job.student_id, job.message)
-    except Exception as e:
-        Log("backend", "error", "service", f"Email failed for {job.student_id}: {e}")
-        # Throwing the error triggers the queue's built-in retry mechanism
-        throw e
+```javascript
+async function notifyAll(studentIds, message) {
+  const jobs = studentIds.map(studentId => ({
+    studentId,
+    message,
+    status: "pending",
+    attempts: 0,
+    createdAt: new Date()
+  }))
+
+  await db.collection("notification_jobs").insertMany(jobs)
+}
+
+async function processPendingJobs() {
+  const jobs = await db.collection("notification_jobs")
+    .find({ status: "pending", attempts: { $lt: 3 } })
+    .limit(100)
+    .toArray()
+
+  for (const job of jobs) {
+    try {
+      await db.collection("notifications").insertOne({
+        ID: crypto.randomUUID(),
+        Type: "Event",
+        Message: job.message,
+        Timestamp: new Date().toISOString(),
+        isRead: false,
+        studentId: job.studentId
+      })
+
+      await db.collection("notification_jobs").updateOne(
+        { _id: job._id },
+        { $set: { status: "completed" } }
+      )
+    } catch {
+      await db.collection("notification_jobs").updateOne(
+        { _id: job._id },
+        { $inc: { attempts: 1 }, $set: { status: "pending" } }
+      )
+    }
+  }
+}
 ```
+
+This keeps the system inside the MERN stack while still supporting retryable bulk notification processing.
+
+---
+
+## Stages 6 and 7
+
+### Backend
+
+The Express backend implements:
+
+- `GET /api/notifications`
+- `GET /api/notifications/unread`
+- `PATCH /api/notifications/:id/read`
+- `POST /api/notifications`
+- `GET /api/priority-inbox`
+- `GET /api/health`
+
+The priority inbox uses a Min-Heap to rank notifications by:
+
+1. Placement
+2. Result
+3. Event
+4. Newer timestamp inside the same type
+
+### Frontend
+
+The React frontend implements:
+
+- All notifications view.
+- Type filtering.
+- Priority inbox view.
+- Mark-as-read action connected to the backend.
+- Loading and error states.
